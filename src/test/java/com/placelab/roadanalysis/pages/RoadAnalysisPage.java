@@ -58,7 +58,7 @@ public class RoadAnalysisPage {
         Random random = new Random();
         this.driver.findElement(REPORT_NAME).sendKeys("Road Analysis Report " + random.nextInt(1000));
         WebElement fileUploadField = this.driver.findElement(By.xpath("//input[@name='files[0]']"));
-        fileUploadField.sendKeys("C:\\Users\\manu\\final-assigment\\road-analysis\\src\\test\\resources\\roads_sample.txt");
+        fileUploadField.sendKeys("src/test/resources/roads_sample.txt");
         final WebDriverWait wait = new WebDriverWait(this.driver, Duration.ofSeconds(5));
         wait.until(ExpectedConditions.elementToBeClickable(CREATE_REPORT_BTN));
         this.driver.findElement(CREATE_REPORT_BTN).click();
