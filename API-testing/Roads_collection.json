@@ -1,0 +1,251 @@
+{
+	"info": {
+		"_postman_id": "2b03bce2-ecaa-4ab9-a068-e5fc1356b43a",
+		"name": "ROADS - Road Analysis Smoke Test",
+		"description": "This Postman collection was created in order to test the Road Analysis module of the PlaceLab application. Using the documentation available on the PlaceLab application, API tests were created.\n\n## Given-When-Then format\n\nFollowing Given-When-Then format, smoke test can be represented in this way:\n\n- Given: the user obtains an authentication token by entering a valid email and password.\n- When: user has authentication token, he is able to upload file for Road analysis report to and to create the report.\n- Then: when user createas report, specific ID is represented in response\n- And: user is able to obtain report status.\n- And: user is able to download the result file.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24638654",
+		"_collection_link": "https://lunar-satellite-569517.postman.co/workspace/QAmp-2023~c15a50f0-cdf8-4121-9d8a-d36726e710cf/collection/24638654-2b03bce2-ecaa-4ab9-a068-e5fc1356b43a?action=share&creator=24638654&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Obtaining auth token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify if the status code is 201.\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"console.log(response);\r",
+							"\r",
+							"pm.test(\"Verify if the response should contains API token.\", function () {\r",
+							"pm.expect(response).to.have.property(\"api_token\").and.not.to.be.empty;\r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"api_token\", response.api_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\" : \"{{validEmail}}\",\r\n    \"password\" : \"{{validPassword}}\"\r\n   \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{pageURL}}/api/v2/sessions",
+					"host": [
+						"{{pageURL}}"
+					],
+					"path": [
+						"api",
+						"v2",
+						"sessions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating report",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test (\"Verify if the status code is 201.\", function (){\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"const response = pm.response.json();\r",
+							"console.log(response);\r",
+							"\r",
+							"pm.test(\"Verify if  the response contains report ID.\", function () {\r",
+							"    pm.expect(response).to.have.property(\"id\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Verify if the response contains status.\", function () {\r",
+							"    pm.expect(response).to.have.property(\"status\");\r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"report_id\", response.id);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/manu/Desktop/roads_sample.txt"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{pageURL}}/api/v2/reports/road_analysis?name=Road+Analysis+Report&file={{filePath}}",
+					"host": [
+						"{{pageURL}}"
+					],
+					"path": [
+						"api",
+						"v2",
+						"reports",
+						"road_analysis"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "Road+Analysis+Report"
+						},
+						{
+							"key": "file",
+							"value": "{{filePath}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining report status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify if the status code is 200.\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"   \r",
+							"const response = pm.response.json();\r",
+							"console.log(response);\r",
+							"\t\t\t\r",
+							"pm.test(\"Verify if the response contains state.\", function () {\r",
+							"  pm.expect(response).to.have.property(\"state\");\r",
+							"});\r",
+							"\r",
+							"if(response.state != \"FINISHED\"){\r",
+							"    postman.setNextRequest(\"Obtaining report status\");\r",
+							"} else {\r",
+							"    postman.setNextRequest(\"Download\");\r",
+							"}\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{pageURL}}/api/v2/reports/{{report_id}}/status",
+					"host": [
+						"{{pageURL}}"
+					],
+					"path": [
+						"api",
+						"v2",
+						"reports",
+						"{{report_id}}",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Download",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify if the status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is present\", function () {\r",
+							"  pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test (\"Download results have correct values.\", function () {\r",
+							" const csvData = pm.response.text();\r",
+							" const lines = csvData.split(\"\\n\");\r",
+							" const expectedHeaders = \"RECORD_ID|STATUS|COMMENT\";\r",
+							"  const actualHeaders = lines[0].trim();\r",
+							"  pm.expect(actualHeaders).to.eql(expectedHeaders);\r",
+							"  pm.expect(lines.length).to.be.above(1);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{pageURL}}/api/v2/reports/{{report_id}}/download",
+					"host": [
+						"{{pageURL}}"
+					],
+					"path": [
+						"api",
+						"v2",
+						"reports",
+						"{{report_id}}",
+						"download"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
